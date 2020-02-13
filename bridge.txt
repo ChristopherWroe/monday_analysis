@@ -1,0 +1,41 @@
+#A script to check journey times to Belfast before and after the new bridge
+
+#import the required libraries
+import requests   #this allows us to call APIs
+import time       #this will be used to reformat timestamps to make them more readable
+
+#Get the users API key - this is needed to query the google API
+print('Please enter your google maps authentication key:')
+key = input()
+
+#Define the origins you are interested in
+origins = ["Glasgow", "Edinburgh", "Liverpool","Newcastle"]
+
+print('\nCurrent Journey times:')
+
+#Start by checking the current journey times between the origins and belfast. Note that the code adds 'UK' to all the place names otherwise you get places to America!
+for origin in origins:
+    res = requests.get('https://maps.googleapis.com/maps/api/distancematrix/json?origins='+origin+'uk'+'&destinations=Belfast+UK,NY&key='+key)
+    jt = res.json()['rows'][0]['elements'][0]['duration']['value']
+    jt_text = time.strftime("%H"+' hours '+ "%M" + ' mins', time.gmtime(jt))
+    print(origin+' '+jt_text)
+
+#And future journey times from these locations to Stranrear (but add 50 minutes for the journey from Stranrear to Belfast)
+
+print('\nJourney times with option 1:')
+
+for origin in origins:
+    res = requests.get('https://maps.googleapis.com/maps/api/distancematrix/json?origins='+origin+'uk'+'&destinations=Stranrear+UK,NY&key='+key)
+    jt = res.json()['rows'][0]['elements'][0]['duration']['value'] + 50*60
+    jt_text = time.strftime("%H"+' hours '+ "%M" + ' mins', time.gmtime(jt))
+    print(origin+' '+jt_text)
+
+#What about the journey time if the bridge is from Mull of Kintyre? Let's calculate journey times to Cambeltown, and add 80 mintues:
+
+print('\nJourney times with option 2:')
+
+for origin in origins:
+    res = requests.get('https://maps.googleapis.com/maps/api/distancematrix/json?origins='+origin+'uk'+'&destinations=Cambeltown+UK,NY&key='+key)
+    jt = res.json()['rows'][0]['elements'][0]['duration']['value'] + 80*60
+    jt_text = time.strftime("%H"+' hours '+ "%M" + ' mins', time.gmtime(jt))
+    print(origin+' '+jt_text)
